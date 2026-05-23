@@ -23,7 +23,8 @@ This repository provides production-ready implementations for:
 ├── session/          # Session service implementations
 │   └── redis/        # Redis session service
 ├── memory/           # Memory service implementations
-│   └── postgres/     # PostgreSQL + pgvector memory service
+│   ├── postgres/     # PostgreSQL + pgvector memory service
+│   └── bedrock/      # AWS Bedrock embedding models (Titan Embeddings V2)
 ├── tools/            # Tool and toolset implementations
 │   └── memory/       # Memory toolset for agents
 ├── artifact/         # Artifact service implementations
@@ -163,6 +164,35 @@ runner, _ := runner.New(runner.Config{
     MemoryService: memoryService,
 })
 ```
+
+### Embedding Models
+
+The `EmbeddingModel` field accepts any implementation of the `EmbeddingModel` interface. Two implementations are provided:
+
+**OpenAI-compatible** (OpenAI, Ollama, vLLM, LocalAI, etc.):
+
+```go
+import memorypostgres "github.com/achetronic/adk-utils-go/memory/postgres"
+
+embeddingModel := memorypostgres.NewOpenAICompatibleEmbedding(memorypostgres.OpenAICompatibleEmbeddingConfig{
+    BaseURL: "http://localhost:11434/v1",
+    Model:   "nomic-embed-text",
+})
+```
+
+**AWS Bedrock (Amazon Titan Embeddings V2)**:
+
+```go
+import memorybedrock "github.com/achetronic/adk-utils-go/memory/bedrock"
+
+embeddingModel, err := memorybedrock.New(ctx, memorybedrock.Config{
+    Region:    "us-east-1",
+    ModelID:   "amazon.titan-embed-text-v2:0",
+    Dimension: 1024,
+})
+```
+
+Authentication uses the standard AWS credential chain (environment variables, IAM roles, AWS profiles, etc.).
 
 ## Memory Toolset
 
